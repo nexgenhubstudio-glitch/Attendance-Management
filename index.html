@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0b0016 100%); 
+            min-height: 100vh;
+            /* padding: 20px;*/
+        }
+
+        .container{
+            /* max-width: 1200px; */
+            margin: 0 auto;
+            background: white;
+            /* border-radius: 15px; */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        /* button {
+            position: absolute;
+            left:40vw
+        } */
+
+        .header h1 {
+            font-size: 2.5em;
+            /* margin-bottom: 10px; */
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .period-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+        }
+
+        .student-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .student-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .attendance-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .attendance-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .present {
+            background: #27ae60;
+            color: white;
+        }
+
+        .absent {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .od {
+            background: #f39c12;
+            color: white;
+        }
+
+        .attendance-btn.selected {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .percentage {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .percentage.good { background: #27ae60; }
+        .percentage.warning { background: #f39c12; }
+        .percentage.danger { background: #e74c3c; }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #27ae60;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .save-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            width: auto;
+            padding: 10px 20px;
+            margin-right: 10px;
+        }
+
+        .edit-mode {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .time-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .student-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .attendance-controls {
+                flex-direction: column;
+            }
+        }
+        #form-group1{
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+        .sider,.sider1{
+            padding-left: 20vw;
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Attendance Management System</h1>
+            <p>Engineering College - Student Attendance Tracker</p>
+        </div>
+
+        <div class="content">
+            <!-- Course Selection Section -->
+            <div class="section active" id="course-selection">
+                <h2 style="text-align: center; padding:5vh 0 13vh 0;">Select Course & Department</h2>
+                
+                <div id="form-group1" class="sider"><div class="form-group">
+                    <label for="degree">Select Degree:</label>
+                    <select id="degree">
+                        <option value="">Choose Degree</option>
+                        <option value="BE">Bachelor of Engineering (BE)</option>
+                        <option value="B-TECH">Bachelor of Technology (B-TECH)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="padding-left: 15vw;">
+                    <label for="department" style="width: 290px;">Select Department:</label>
+                    <select id="department" disabled>
+                        <option value="">Choose Department</option>
+                    </select>
+                </div>
+</div>
+                <div id="form-group1" class="sider1"><div class="form-group">
+                    <label for="year" style="width: 290px;">Select Year:</label>
+                    <select id="year">
+                        <option value="">Choose Year</option>
+                        <option value="1">First Year</option>
+                        <option value="2">Second Year</option>
+                        <option value="3">Third Year</option>
+                        <option value="4">Fourth Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="padding-left: 15vw;">
+                    <label for="section" style="width: 290px;">Select Section:</label>
+                    <select id="section">
+                        <option value="">Choose Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section d</option>
+                    </select>
+                </div>
+</div>
+                <button onclick="loadStudents()" style="width: 290px;position: relative;left: 40vw;">Load Students</button>
+            </div>
+
+            <!-- Attendance Section -->
+            <div class="section" id="attendance-section">
+                <button class="back-btn" onclick="goBack()">← Back to Course Selection</button>
+                
+                <div class="period-info">
+                    <h3 id="course-info">Course Information</h3>
+                    <div class="time-display" id="current-time"></div>
+                    <div id="period-details">
+                        <strong>Current Period:</strong> <span id="current-period">Period 1</span> | 
+                        <strong>Time:</strong> <span id="period-time">9:00 AM - 10:00 AM</span> | 
+                        <strong>Subject:</strong> <span id="current-subject">Mathematics</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="period-select">Select Period:</label>
+                    <select id="period-select" onchange="changePeriod()">
+                        <option value="1">Period 1 (9:00 AM - 10:00 AM) - Mathematics</option>
+                        <option value="2">Period 2 (10:00 AM - 11:00 AM) - Physics</option>
+                        <option value="3">Period 3 (11:15 AM - 12:15 PM) - Chemistry</option>
+                        <option value="4">Period 4 (12:15 PM - 1:15 PM) - Programming</option>
+                        <option value="5">Period 5 (2:00 PM - 3:00 PM) - Data Structures</option>
+                        <option value="6">Period 6 (3:00 PM - 4:00 PM) - Database Systems</option>
+                        <option value="7">Period 7 (4:00 PM - 5:00 PM) - Software Engineering</option>
+                    </select>
+                </div>
+
+                <div id="students-container" class="student-grid">
+                    <!-- Students will be loaded here -->
+                </div>
+
+                <div class="save-section">
+                    <button onclick="toggleEditMode()">📝 Edit Attendance</button>
+                    <button onclick="saveAttendance()">💾 Save Attendance</button>
+                    <button onclick="generateReport()">📊 Generate Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        // Sample data structure
+        const departments = {
+            'BE': ['CSE', 'CSD', 'AIDS', 'CIVIL', 'MECHANICAL', 'MECHATRONIC', 'EEE', 'ECE'],
+            'B-TECH': ['IT','AIDS']
+        };
+
+        const subjects = {
+            '1': ['ASUP', 'OS', 'C', 'Programming', 'English', 'Workshop', 'Drawing'],
+            '2': ['Data Structures', 'Database Systems', 'Computer Networks', 'Operating Systems', 'Software Engineering', 'Web Technologies', 'Mobile Computing'],
+            '3': ['Machine Learning', 'Artificial Intelligence', 'Cloud Computing', 'Cyber Security', 'Project Management', 'Internship', 'Seminar'],
+            '4': ['Major Project', 'Minor Project', 'Industrial Training', 'Thesis', 'Placement Training', 'Entrepreneurship', 'Final Seminar']
+        };
+
+        const periods = [
+            { id: 1, time: '9:00 AM - 10:00 AM', subject: 'Mathematics' },
+            { id: 2, time: '10:00 AM - 11:00 AM', subject: 'Physics' },
+            { id: 3, time: '11:15 AM - 12:15 PM', subject: 'Chemistry' },
+            { id: 4, time: '12:15 PM - 1:15 PM', subject: 'Programming' },
+            { id: 5, time: '2:00 PM - 3:00 PM', subject: 'Data Structures' },
+            { id: 6, time: '3:00 PM - 4:00 PM', subject: 'Database Systems' },
+            { id: 7, time: '4:00 PM - 5:00 PM', subject: 'Software Engineering' }
+        ];
+
+        let students = [];
+        let currentCourse = {};
+        let attendanceData = {};
+        let editMode = false;
+
+        // Generate sample students data
+        function generateStudents(department, year, section) {
+            const firstNames = ['Rahul', 'Priya', 'Amit', 'Sneha', 'Vikram', 'Anita', 'Suresh', 'Kavya', 'Arjun', 'Meera', 'Ravi', 'Divya', 'Krishna', 'Sita', 'Mohan', 'Lakshmi', 'Arun', 'Pooja', 'Sanjay', 'Nisha', 'Kiran', 'Deepa', 'Rajesh', 'Sunita', 'Vijay', 'Asha', 'Prakash', 'Rekha', 'Suresh', 'Gita'];
+            const lastNames = ['Sharma', 'Patel', 'Kumar', 'Singh', 'Reddy', 'Nair', 'Iyer', 'Gupta', 'Rao', 'Joshi', 'Agarwal', 'Verma', 'Mehta', 'Shah', 'Desai', 'Kulkarni', 'Bhatt', 'Trivedi', 'Pandey', 'Mishra', 'Tiwari', 'Saxena', 'Bansal', 'Goyal', 'Arora', 'Malhotra', 'Chopra', 'Kapoor', 'Sinha', 'Jain'];
+            
+            const studentList = [];
+            const numStudents = 30;
+            
+            for (let i = 1; i <= numStudents; i++) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const rollNo = `${year}${department}${section}${String(i).padStart(3, '0')}`;
+                const phone = `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`;
+                
+                studentList.push({
+                    id: i,
+                    name: `${firstName} ${lastName}`,
+                    rollNo: rollNo,
+                    phone: phone,
+                    attendance: Math.floor(Math.random() * 30) + 70, // Random attendance between 70-100%
+                    totalClasses: 100
+                });
+            }
+            return studentList;
+        }
+
+        // Initialize department dropdown
+        document.getElementById('degree').addEventListener('change', function() {
+            const degree = this.value;
+            const deptSelect = document.getElementById('department');
+            
+            deptSelect.innerHTML = '<option value="">Choose Department</option>';
+            
+            if (degree && departments[degree]) {
+                departments[degree].forEach(dept => {
+                    deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+                });
+                deptSelect.disabled = false;
+            } else {
+                deptSelect.disabled = true;
+            }
+        });
+
+        function loadStudents() {
+            const degree = document.getElementById('degree').value;
+            const department = document.getElementById('department').value;
+            const year = document.getElementById('year').value;
+            const section = document.getElementById('section').value;
+
+            if (!degree || !department || !year || !section) {
+                showNotification('Please select all fields', 'error');
+                return;
+            }
+
+            currentCourse = { degree, department, year, section };
+            students = generateStudents(department, year, section);
+            
+            // Initialize attendance data for each student
+            students.forEach(student => {
+                if (!attendanceData[student.id]) {
+                    attendanceData[student.id] = {};
+                }
+                periods.forEach(period => {
+                    if (!attendanceData[student.id][period.id]) {
+                        attendanceData[student.id][period.id] = 'present'; // Default to present
+                    }
+                });
+            });
+
+            document.getElementById('course-info').textContent = 
+                `${degree} - ${department} | Year: ${year} | Section: ${section}`;
+            
+            displayStudents();
+            showSection('attendance-section');
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        function displayStudents() {
+            const container = document.getElementById('students-container');
+            const currentPeriod = parseInt(document.getElementById('period-select').value);
+            
+            container.innerHTML = '';
+            
+            students.forEach(student => {
+                const attendanceStatus = attendanceData[student.id][currentPeriod] || 'present';
+                const attendancePercentage = calculateAttendancePercentage(student.id);
+                
+                const studentCard = document.createElement('div');
+                studentCard.className = `student-card ${editMode ? 'edit-mode' : ''}`;
+                
+                studentCard.innerHTML = `
+                    <div class="student-info">
+                        <div>
+                            <strong>${student.name}</strong><br>
+                            <small>Roll No: ${student.rollNo}</small>
+                        </div>
+                        <div>
+                            <small>Phone: ${student.phone}</small>
+                        </div>
+                        <div class="percentage ${getPercentageClass(attendancePercentage)}">
+                            ${attendancePercentage}% Attendance
+                        </div>
+                    </div>
+                    <div class="attendance-controls">
+                        <button class="attendance-btn present ${attendanceStatus === 'present' ? 'selected' : ''}" 
+                                onclick="markAttendance(${student.id}, 'present')">
+                            ✓ Present
+                        </button>
+                        <button class="attendance-btn absent ${attendanceStatus === 'absent' ? 'selected' : ''}" 
+                                onclick="markAttendance(${student.id}, 'absent')">
+                            ✗ Absent
+                        </button>
+                        <button class="attendance-btn od ${attendanceStatus === 'od' ? 'selected' : ''}" 
+                                onclick="markAttendance(${student.id}, 'od')">
+                            📋 OD
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(studentCard);
+            });
+        }
+
+        function markAttendance(studentId, status) {
+            if (!editMode) {
+                showNotification('Enable edit mode to modify attendance', 'warning');
+                return;
+            }
+
+            const currentPeriod = parseInt(document.getElementById('period-select').value);
+            const previousStatus = attendanceData[studentId][currentPeriod];
+            
+            attendanceData[studentId][currentPeriod] = status;
+            
+            // Update UI
+            displayStudents();
+            
+            // Send notification if student is absent or on OD
+            if ((status === 'absent' || status === 'od') && previousStatus !== status) {
+                const student = students.find(s => s.id === studentId);
+                sendNotificationToStudent(student, status);
+            }
+            
+            showNotification(`Attendance marked as ${status.toUpperCase()}`, 'success');
+        }
+
+        function sendNotificationToStudent(student, status) {
+            const attendancePercentage = calculateAttendancePercentage(student.id);
+            const currentPeriod = periods[parseInt(document.getElementById('period-select').value) - 1];
+            
+            const message = `Dear ${student.name}, you were marked ${status.toUpperCase()} for ${currentPeriod.subject} (${currentPeriod.time}). Current attendance: ${attendancePercentage}%. Please contact your faculty for any clarifications.`;
+            
+            // Simulate sending SMS (in real implementation, this would call an SMS API)
+            console.log(`SMS to ${student.phone}: ${message}`);
+            showNotification(`Notification sent to ${student.name}`, 'info');
+        }
+
+        function calculateAttendancePercentage(studentId) {
+            const studentAttendance = attendanceData[studentId];
+            let presentCount = 0;
+            let totalCount = 0;
+            
+            Object.values(studentAttendance).forEach(status => {
+                totalCount++;
+                if (status === 'present'|| status === 'od') {
+                    presentCount++;
+                }
+            });
+            
+            return totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 100;
+        }
+
+        function getPercentageClass(percentage) {
+            if (percentage >= 85) return 'good';
+            if (percentage >= 70) return 'warning';
+            return 'danger';
+        }
+
+        function changePeriod() {
+            displayStudents();
+            const selectedPeriod = parseInt(document.getElementById('period-select').value);
+            const period = periods[selectedPeriod - 1];
+            
+            document.getElementById('current-period').textContent = `Period ${selectedPeriod}`;
+            document.getElementById('period-time').textContent = period.time;
+            document.getElementById('current-subject').textContent = period.subject;
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const editBtn = event.target;
+            
+            if (editMode) {
+                editBtn.textContent = '🔒 Lock Attendance';
+                editBtn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                showNotification('Edit mode enabled', 'info');
+            } else {
+                editBtn.textContent = '📝 Edit Attendance';
+                editBtn.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+                showNotification('Edit mode disabled', 'info');
+            }
+            
+            displayStudents();
+        }
+
+        function saveAttendance() {
+            // Simulate saving to database
+            const data = {
+                course: currentCourse,
+                attendance: attendanceData,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('Saving attendance data:', data);
+            showNotification('Attendance saved successfully!', 'success');
+        }
+
+        function generateReport() {
+            let report = `Attendance Report\n`;
+            report += `Course: ${currentCourse.degree} - ${currentCourse.department}\n`;
+            report += `Year: ${currentCourse.year} | Section: ${currentCourse.section}\n`;
+            report += `Generated on: ${new Date().toLocaleString()}\n\n`;
+            
+            students.forEach(student => {
+                const percentage = calculateAttendancePercentage(student.id);
+                report += `${student.name} (${student.rollNo}): ${percentage}%\n`;
+            });
+            
+            console.log(report);
+            showNotification('Report generated! Check console for details.', 'success');
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function goBack() {
+            showSection('course-selection');
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            
+            // Set color based on type
+            switch(type) {
+                case 'error':
+                    notification.style.background = '#e74c3c';
+                    break;
+                case 'warning':
+                    notification.style.background = '#f39c12';
+                    break;
+                case 'info':
+                    notification.style.background = '#3498db';
+                    break;
+                default:
+                    notification.style.background = '#27ae60';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+        });
+    </script>
+</body>
+</html>
